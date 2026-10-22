@@ -8,24 +8,20 @@ import { useUserStore } from "../store/useUserStore"
 
 const ItemDetail = () => {
     const { id } = useParams()
-    // const items = useItemStore((state) => state.items)
-    // const item = items?.find((item) => String(item.id) === id)
-    // const getItems = useItemStore((state) => state.getItems)
     const [item, setItem] = useState(undefined)
     const [error, setError] = useState("")
     const [timerId, setTimerId] = useState(undefined)
     const [bids, setBids] = useState([])
     const [isLoading, setIsLoading] = useState(false)
-    const { session } = useUserStore()
+    const session = useUserStore(state => state.session)
     const navigate = useNavigate()
 
     useEffect(() => {
         const load = async () => {
             setIsLoading(true)
             try {
-                
-                await getItems()
-                await loadBids()
+                const res = await api.getItemDetails(id)
+                setItem(res.data)
             } catch (error) {
                 console.error(error)
                 setError(error.message || "Что-то пошло не так")
@@ -43,10 +39,11 @@ const ItemDetail = () => {
         return () => {
             clearInterval(timerId)
         }
-    }, [])
+    }, [id])
 
     const handleBid = async (e) => {
         e.preventDefault()
+        if (!session) return navigate('/register')
         setError("")
 
         const form = e.target
